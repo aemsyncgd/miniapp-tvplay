@@ -48,12 +48,12 @@
             <img src="https://vidanet.com.ve/wp-content/uploads/2022/10/logohb.png" alt="Logo" class="h-12">
             <div class="border-l-2 border-primary pl-4">
                 <h1 class="text-xl font-bold text-dark">Gestión de Clientes IPTV</h1>
-                <p class="text-xs text-textGray">Panel de Administración API</p>
+                <p class="text-xs text-textGray">Panel de Administración Seguro</p>
             </div>
         </div>
-        <div class="flex items-center gap-2 text-sm">
-            <span class="text-secondary">Token:</span>
-            <input type="password" id="apiToken" value="pfw1glvsil02xpkv771se94x3wumnpo8nkk4osfywrdgdlzi5rhnfi0nmzvs1z5y" class="border border-gray-200 rounded-lg px-3 py-1.5 w-64 text-xs focus:ring-2 focus:ring-primary focus:outline-none" placeholder="x-access-token">
+        <!-- Botón para cambiar contraseña de sesión (opcional) -->
+        <div class="flex items-center gap-2">
+             <button onclick="resetPassword()" class="text-xs text-secondary hover:text-primary transition">Reiniciar Acceso</button>
         </div>
     </header>
 
@@ -229,23 +229,58 @@
     </main>
 
     <script>
-        // --- CONFIGURACIÓN API ---
-        const API_BASE = "https://apiusertv.bessersolutions.com";
+        // --- CONFIGURACIÓN API (SEGURA) ---
+        // Apuntamos a nuestro propio proxy, no a la API externa directamente.
+        const API_BASE = "/api/proxy"; 
+        
         const ENDPOINTS = {
-            new: `${API_BASE}/user/new`,
-            show: `${API_BASE}/user/show`,
-            delete: `${API_BASE}/user/delete`,
-            list: `${API_BASE}/user/list`
+            new: `${API_BASE}?endpoint=user/new`,
+            show: `${API_BASE}?endpoint=user/show`,
+            delete: `${API_BASE}?endpoint=user/delete`,
+            list: `${API_BASE}?endpoint=user/list`
         };
+
+        // --- GESTIÓN DE CONTRASEÑA DE APP (CAPA DE SEGURIDAD) ---
+        let currentPassword = localStorage.getItem('app_access_pass') || '';
+
+        // Si no hay contraseña guardada, la pedimos al usuario.
+        // Esto usa la variable APP_PASSWORD que configures en Vercel.
+        if (!currentPassword) {
+            askForPassword();
+        }
+
+        function askForPassword() {
+            const pass = prompt("Ingrese la clave de acceso para utilizar la aplicación:");
+            if (pass) {
+                currentPassword = pass;
+                localStorage.setItem('app_access_pass', pass);
+            } else {
+                alert("Necesita la clave de acceso para continuar.");
+                // Podrías recargar la página si lo deseas: location.reload();
+            }
+        }
+
+        function resetPassword() {
+            localStorage.removeItem('app_access_pass');
+            location.reload();
+        }
+
+        function getHeaders() {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            // Enviamos la clave que el usuario ingresó para que el proxy la valide
+            if (currentPassword) {
+                headers['x-app-password'] = currentPassword;
+            }
+            return headers;
+        }
 
         // --- HELPERS UI ---
         function openTab(name) {
-            // Ocultar paneles
             document.querySelectorAll('.tab-panel').forEach(el => el.classList.add('hidden'));
-            // Mostrar panel activo
             document.getElementById(`panel-${name}`).classList.remove('hidden');
             
-            // Estilo botones
             document.querySelectorAll('[id^="btn-"]').forEach(btn => {
                 btn.classList.remove('tab-active');
                 btn.classList.add('text-textGray');
@@ -261,29 +296,20 @@
             el.scrollTop = el.scrollHeight;
         }
 
-        function getHeaders() {
-            return {
-                'Content-Type': 'application/json',
-                'x-access-token': document.getElementById('apiToken').value
-            };
-        }
-
-        // --- LÓGICA DE DATOS (CARGA) ---
+        // --- LÓGICA DE DATOS ---
         let dataCrear = [];
         let dataBorrar = [];
 
         function parseData(data, type) {
             let result = [];
             data.forEach(row => {
-                // Limpiar espacios
                 row = row.map(cell => String(cell).trim());
                 
                 if (type === 'crear') {
-                    if (row.length >= 3 && row[1] !== '') { // Nombre, Cedula, Pantallas
+                    if (row.length >= 3 && row[1] !== '') {
                         result.push({ nombre: row[0], cedula: row[1], pantallas: row[2] });
                     }
                 } else if (type === 'borrar') {
-                    // Si hay 3 columnas tomamos la 2da (cedula), si hay 1 tomamos la 1ra
                     let docId = row.length >= 3 ? row[1] : row[0];
                     if (docId) result.push({ cedula: docId });
                 }
@@ -307,7 +333,6 @@
             });
         }
 
-        // LECTURA DE ARCHIVOS
         function processFile(type) {
             const fileInput = document.getElementById(`file${type.charAt(0).toUpperCase() + type.slice(1)}`);
             const file = fileInput.files[0];
@@ -318,10 +343,7 @@
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                // Obtenemos los datos como array de arrays (header: 1)
                 const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                
-                // Filtramos filas vacías
                 const filtered = jsonData.filter(row => row.length > 0 && row.join('').trim() !== '');
                 
                 if (type === 'crear') {
@@ -352,22 +374,16 @@
             }
         }
 
-        // --- LLAMADAS API ---
+        // --- LLAMADAS API (VÍA PROXY) ---
         async function startCreation() {
             if (dataCrear.length === 0) return alert("No hay datos para crear.");
-            
             if (!confirm(`¿Seguro que deseas crear ${dataCrear.length} usuarios?`)) return;
             
-            document.getElementById('logCrear').innerHTML = ''; // Limpiar log
+            document.getElementById('logCrear').innerHTML = ''; 
             log("🚀 Iniciando proceso de creación...", 'logCrear');
 
             for (const user of dataCrear) {
-                const payload = {
-                    docid: user.cedula,
-                    nombre: user.nombre,
-                    max_connections: String(user.pantallas)
-                };
-
+                const payload = { docid: user.cedula, nombre: user.nombre, max_connections: String(user.pantallas) };
                 try {
                     const res = await fetch(ENDPOINTS.new, {
                         method: 'POST',
@@ -383,7 +399,6 @@
                 } catch (err) {
                     log(`❌ Conexión fallida: ${err.message}`, 'logCrear');
                 }
-                // Pequeña pausa para no saturar
                 await new Promise(r => setTimeout(r, 200));
             }
             log("🏁 Proceso finalizado.", 'logCrear');
@@ -391,7 +406,6 @@
 
         async function startDeletion() {
             if (dataBorrar.length === 0) return alert("No hay datos para borrar.");
-            
             if (!confirm(`⚠️ PELIGRO: ¿Seguro que deseas BORRAR ${dataBorrar.length} usuarios?`)) return;
 
             document.getElementById('logBorrar').innerHTML = '';
@@ -425,19 +439,27 @@
             tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-secondary">Cargando...</td></tr>';
 
             try {
-                const res = await fetch(`${ENDPOINTS.list}?page=${page}&limit=${limit}`, {
+                // Pasamos page y limit como parámetros query al proxy
+                const res = await fetch(`${ENDPOINTS.list}&page=${page}&limit=${limit}`, {
                     method: 'GET',
                     headers: getHeaders()
                 });
                 const data = await res.json();
-                
-                // Renderizar tabla
-                tbody.innerHTML = '';
-                // Asumimos que data es un array o data.data/list
-                const users = Array.isArray(data) ? data : (data.data || data.users || []);
 
+                if (!res.ok) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-red-500 font-bold">Error ${res.status}: ${data.error || JSON.stringify(data)}</td></tr>`;
+                    return;
+                }
+
+                let users = [];
+                if (Array.isArray(data)) users = data;
+                else if (data.data) users = data.data;
+                else if (data.users) users = data.users;
+                else if (data.results) users = data.results;
+                
+                tbody.innerHTML = '';
                 if (users.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-secondary">No hay datos</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-secondary">La lista está vacía.</td></tr>';
                     return;
                 }
 
@@ -445,7 +467,7 @@
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td class="px-4 py-2">${u.nombre || '-'}</td>
-                        <td class="px-4 py-2 font-mono text-blue">${u.docid || '-'}</td>
+                        <td class="px-4 py-2 font-mono text-blue">${u.docid || u.username || '-'}</td>
                         <td class="px-4 py-2">${u.max_connections || '-'}</td>
                         <td class="px-4 py-2"><span class="px-2 py-1 text-xs rounded-full ${u.status === 'active' ? 'bg-green/10 text-green' : 'bg-gray-100 text-secondary'}">${u.status || '-'}</span></td>
                         <td class="px-4 py-2 text-xs text-textGray">${u._id || '-'}</td>
@@ -466,7 +488,8 @@
             resBox.innerText = "Buscando...";
 
             try {
-                const res = await fetch(`${ENDPOINTS.show}?docid=${docId}`, {
+                // Pasamos docid como query param
+                const res = await fetch(`${ENDPOINTS.show}&docid=${docId}`, {
                     method: 'GET',
                     headers: getHeaders()
                 });
@@ -476,11 +499,10 @@
                 resBox.innerText = `Error: ${err.message}`;
             }
         }
-
+        
         async function deleteIndividual() {
             const docId = document.getElementById('searchDocId').value;
             if (!docId) return alert("Ingrese una cédula en el campo de búsqueda primero.");
-            
             if(!confirm(`¿Seguro que deseas borrar al usuario ${docId}?`)) return;
 
             const resBox = document.getElementById('resultIndividual');
