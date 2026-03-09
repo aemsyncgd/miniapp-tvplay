@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión IPTV - Vidanet</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SheetJS para leer Excel -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script>
@@ -16,19 +13,11 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#6EC1E4',
-                        secondary: '#54595F',
-                        textGray: '#7A7A7A',
-                        accent: '#61CE70',
-                        blue: '#1597E5',
-                        green: '#3CCF4E',
-                        orange: '#F77E21',
-                        light: '#F9F9F9',
-                        dark: '#1A1A1A'
+                        primary: '#6EC1E4', secondary: '#54595F', textGray: '#7A7A7A',
+                        accent: '#61CE70', blue: '#1597E5', green: '#3CCF4E',
+                        orange: '#F77E21', light: '#F9F9F9', dark: '#1A1A1A'
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif']
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
                 }
             }
         }
@@ -36,8 +25,6 @@
     <style>
         body { background-color: #F9F9F9; }
         .tab-active { border-bottom: 3px solid #6EC1E4; color: #1A1A1A; font-weight: 600; }
-        .loader { border-top-color: #6EC1E4; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="font-sans text-dark min-h-screen">
@@ -48,126 +35,74 @@
             <img src="https://vidanet.com.ve/wp-content/uploads/2022/10/logohb.png" alt="Logo" class="h-12">
             <div class="border-l-2 border-primary pl-4">
                 <h1 class="text-xl font-bold text-dark">Gestión de Clientes IPTV</h1>
-                <p class="text-xs text-textGray">Panel de Administración Seguro</p>
+                <p class="text-xs text-textGray">Panel Seguro</p>
             </div>
         </div>
-        <!-- Botón para cambiar contraseña de sesión (opcional) -->
-        <div class="flex items-center gap-2">
-             <button onclick="resetPassword()" class="text-xs text-secondary hover:text-primary transition">Reiniciar Acceso</button>
-        </div>
+        <button onclick="resetPassword()" class="text-xs text-secondary hover:text-primary transition border px-3 py-1 rounded-full">Cerrar Sesión</button>
     </header>
 
-    <!-- MAIN CONTENT -->
+    <!-- MAIN -->
     <main class="container mx-auto px-6 pb-10">
-        
         <!-- TABS -->
         <div class="flex space-x-4 border-b border-gray-200 mb-6">
-            <button onclick="openTab('crear')" id="btn-crear" class="px-4 py-2 text-textGray hover:text-dark transition tab-active">
-                1. Crear Usuarios (Masivo)
-            </button>
-            <button onclick="openTab('borrar')" id="btn-borrar" class="px-4 py-2 text-textGray hover:text-dark transition">
-                2. Borrar Usuarios (Masivo)
-            </button>
-            <button onclick="openTab('lista')" id="btn-lista" class="px-4 py-2 text-textGray hover:text-dark transition">
-                3. Ver Lista
-            </button>
-            <button onclick="openTab('individual')" id="btn-individual" class="px-4 py-2 text-textGray hover:text-dark transition">
-                4. Búsqueda Individual
-            </button>
+            <button onclick="openTab('crear')" id="btn-crear" class="px-4 py-2 text-textGray hover:text-dark transition tab-active">1. Crear Usuarios</button>
+            <button onclick="openTab('borrar')" id="btn-borrar" class="px-4 py-2 text-textGray hover:text-dark transition">2. Borrar Usuarios</button>
+            <button onclick="openTab('lista')" id="btn-lista" class="px-4 py-2 text-textGray hover:text-dark transition">3. Ver Lista</button>
+            <button onclick="openTab('individual')" id="btn-individual" class="px-4 py-2 text-textGray hover:text-dark transition">4. Búsqueda Individual</button>
         </div>
 
-        <!-- PANEL: CREAR USUARIOS -->
+        <!-- PANEL CREAR -->
         <div id="panel-crear" class="tab-panel">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Carga de datos -->
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                     <h3 class="font-semibold text-lg mb-4 text-dark flex items-center gap-2">
-                        <span class="bg-primary/10 text-primary p-2 rounded-lg">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                        </span>
-                        Fuente de Datos
+                        <span class="bg-primary/10 text-primary p-2 rounded-lg">📂</span> Fuente de Datos
                     </h3>
                     <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-secondary mb-1">Subir Archivo (Excel, CSV, TXT)</label>
-                            <input type="file" id="fileCrear" accept=".xlsx,.xls,.csv,.txt" onchange="processFile('crear')" class="block w-full text-sm text-textGray file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
-                        </div>
-                        <div class="text-center text-xs text-textGray font-medium">O pega los datos aquí abajo</div>
+                        <input type="file" id="fileCrear" accept=".xlsx,.xls,.csv,.txt" onchange="processFile('crear')" class="block w-full text-sm text-textGray file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer">
                         <textarea id="textCrear" rows="5" class="w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary focus:outline-none" placeholder="Nombre, Cedula, Pantallas&#10;Juan Perez, V12345678, 2"></textarea>
-                        <button onclick="processText('crear')" class="w-full bg-light text-dark py-2 rounded-lg font-medium hover:bg-gray-200 transition text-sm">
-                            Procesar Texto Pegado
-                        </button>
+                        <button onclick="processText('crear')" class="w-full bg-light text-dark py-2 rounded-lg font-medium hover:bg-gray-200 transition text-sm">Procesar Texto</button>
                     </div>
                 </div>
-
-                <!-- Tabla y Envío -->
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex flex-col">
-                    <h3 class="font-semibold text-lg mb-4 text-dark">Revisión y Envío</h3>
+                    <h3 class="font-semibold text-lg mb-4 text-dark">Revisión</h3>
                     <div class="flex-1 overflow-auto max-h-64 border rounded-lg mb-4">
                         <table class="min-w-full divide-y divide-gray-200 text-xs">
-                            <thead class="bg-gray-50 sticky top-0">
-                                <tr>
-                                    <th class="px-4 py-2 text-left font-semibold text-secondary">Nombre</th>
-                                    <th class="px-4 py-2 text-left font-semibold text-secondary">Cedula</th>
-                                    <th class="px-4 py-2 text-left font-semibold text-secondary">Pantallas</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableCrearBody" class="divide-y divide-gray-100">
-                                <!-- Filas dinámicas -->
-                            </tbody>
+                            <thead class="bg-gray-50 sticky top-0"><tr><th class="px-4 py-2 text-left font-semibold text-secondary">Nombre</th><th class="px-4 py-2 text-left font-semibold text-secondary">Cedula</th><th class="px-4 py-2 text-left font-semibold text-secondary">Pantallas</th></tr></thead>
+                            <tbody id="tableCrearBody" class="divide-y divide-gray-100"></tbody>
                         </table>
                     </div>
-                    <button onclick="startCreation()" class="w-full bg-accent hover:bg-green-500 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-accent/30 flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                        Crear Usuarios en API
-                    </button>
-                    <!-- Log -->
+                    <button onclick="startCreation()" class="w-full bg-accent hover:bg-green-500 text-white font-bold py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2">🚀 Crear Usuarios</button>
                     <div id="logCrear" class="mt-4 bg-dark rounded-lg p-3 h-32 overflow-auto text-xs font-mono text-light"></div>
                 </div>
             </div>
         </div>
 
-        <!-- PANEL: BORRAR USUARIOS -->
+        <!-- PANEL BORRAR -->
         <div id="panel-borrar" class="tab-panel hidden">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                     <h3 class="font-semibold text-lg mb-4 text-dark flex items-center gap-2">
-                        <span class="bg-orange/10 text-orange p-2 rounded-lg">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </span>
-                        Lista a Eliminar
+                        <span class="bg-orange/10 text-orange p-2 rounded-lg">🗑️</span> Lista a Eliminar
                     </h3>
                     <div class="space-y-4">
                         <input type="file" id="fileBorrar" accept=".xlsx,.xls,.csv,.txt" onchange="processFile('borrar')" class="block w-full text-sm text-textGray file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange/10 file:text-orange hover:file:bg-orange/20 cursor-pointer">
                         <textarea id="textBorrar" rows="5" class="w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-orange focus:outline-none" placeholder="V12345678&#10;V87654321"></textarea>
-                        <button onclick="processText('borrar')" class="w-full bg-light text-dark py-2 rounded-lg font-medium hover:bg-gray-200 transition text-sm">
-                            Procesar Lista
-                        </button>
+                        <button onclick="processText('borrar')" class="w-full bg-light text-dark py-2 rounded-lg font-medium hover:bg-gray-200 transition text-sm">Procesar Lista</button>
                     </div>
                 </div>
-
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex flex-col">
                     <h3 class="font-semibold text-lg mb-4 text-dark">DocIDs a eliminar</h3>
                     <div class="flex-1 overflow-auto max-h-64 border rounded-lg mb-4">
-                         <table class="min-w-full divide-y divide-gray-200 text-xs">
-                            <thead class="bg-gray-50 sticky top-0">
-                                <tr>
-                                    <th class="px-4 py-2 text-left font-semibold text-secondary">DocID (Cedula)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableBorrarBody" class="divide-y divide-gray-100"></tbody>
-                        </table>
+                         <table class="min-w-full divide-y divide-gray-200 text-xs"><thead class="bg-gray-50 sticky top-0"><tr><th class="px-4 py-2 text-left font-semibold text-secondary">Cedula</th></tr></thead><tbody id="tableBorrarBody" class="divide-y divide-gray-100"></tbody></table>
                     </div>
-                    <button onclick="startDeletion()" class="w-full bg-orange hover:bg-orange/80 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-orange/30 flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        Borrar Seleccionados
-                    </button>
+                    <button onclick="startDeletion()" class="w-full bg-orange hover:bg-orange/80 text-white font-bold py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2">🗑️ Borrar Seleccionados</button>
                     <div id="logBorrar" class="mt-4 bg-dark rounded-lg p-3 h-32 overflow-auto text-xs font-mono text-light"></div>
                 </div>
             </div>
         </div>
 
-        <!-- PANEL: VER LISTA -->
+        <!-- PANEL LISTA -->
         <div id="panel-lista" class="tab-panel hidden">
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                 <div class="flex justify-between items-center mb-4">
@@ -179,49 +114,32 @@
                             <label class="text-xs text-secondary">Limite:</label>
                             <input type="number" id="listLimit" value="100" class="w-16 border rounded px-2 py-1 text-sm">
                         </div>
-                        <button onclick="fetchList()" class="bg-blue text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue/80 transition flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                            Obtener Lista
-                        </button>
+                        <button onclick="fetchList()" class="bg-blue text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue/80 transition">Obtener Lista</button>
                     </div>
                 </div>
                 <div class="overflow-x-auto border rounded-lg">
                     <table class="min-w-full divide-y divide-gray-200 text-sm">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left font-semibold text-secondary">Nombre</th>
-                                <th class="px-4 py-2 text-left font-semibold text-secondary">DocID</th>
-                                <th class="px-4 py-2 text-left font-semibold text-secondary">Conexiones</th>
-                                <th class="px-4 py-2 text-left font-semibold text-secondary">Estado</th>
-                                <th class="px-4 py-2 text-left font-semibold text-secondary">ID</th>
-                            </tr>
-                        </thead>
+                        <thead class="bg-gray-50"><tr><th class="px-4 py-2 text-left font-semibold text-secondary">Nombre</th><th class="px-4 py-2 text-left font-semibold text-secondary">DocID</th><th class="px-4 py-2 text-left font-semibold text-secondary">Conexiones</th><th class="px-4 py-2 text-left font-semibold text-secondary">Estado</th><th class="px-4 py-2 text-left font-semibold text-secondary">ID</th></tr></thead>
                         <tbody id="tableListaBody" class="divide-y divide-gray-100"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- PANEL: INDIVIDUAL -->
+        <!-- PANEL INDIVIDUAL -->
         <div id="panel-individual" class="tab-panel hidden">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                     <h3 class="font-semibold text-lg mb-4 text-dark">Buscar Usuario</h3>
                     <div class="flex gap-2 mb-4">
-                        <input type="text" id="searchDocId" placeholder="Ingrese Cedula (DocID)" class="flex-1 border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
+                        <input type="text" id="searchDocId" placeholder="Ingrese Cedula" class="flex-1 border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none">
                         <button onclick="searchUser()" class="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-primary/80 transition">Buscar</button>
                     </div>
-                    <button onclick="deleteIndividual()" class="w-full bg-orange/10 text-orange border border-orange/20 py-2 rounded-lg font-medium hover:bg-orange hover:text-white transition text-sm">
-                        Borrar usuario encontrado
-                    </button>
+                    <button onclick="deleteIndividual()" class="w-full bg-orange/10 text-orange border border-orange/20 py-2 rounded-lg font-medium hover:bg-orange hover:text-white transition text-sm">Borrar usuario encontrado</button>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                     <h3 class="font-semibold text-lg mb-4 text-dark">Resultado</h3>
-                    <pre id="resultIndividual" class="bg-dark text-green-400 p-4 rounded-lg text-xs overflow-auto h-64 font-mono">
-{
-  "mensaje": "Esperando consulta..."
-}
-                    </pre>
+                    <pre id="resultIndividual" class="bg-dark text-green-400 p-4 rounded-lg text-xs overflow-auto h-64 font-mono">{ "mensaje": "Esperando..." }</pre>
                 </div>
             </div>
         </div>
@@ -229,10 +147,8 @@
     </main>
 
     <script>
-        // --- CONFIGURACIÓN API (SEGURA) ---
-        // Apuntamos a nuestro propio proxy, no a la API externa directamente.
+        // --- CONFIGURACIÓN ---
         const API_BASE = "/api/proxy"; 
-        
         const ENDPOINTS = {
             new: `${API_BASE}?endpoint=user/new`,
             show: `${API_BASE}?endpoint=user/show`,
@@ -240,23 +156,20 @@
             list: `${API_BASE}?endpoint=user/list`
         };
 
-        // --- GESTIÓN DE CONTRASEÑA DE APP (CAPA DE SEGURIDAD) ---
+        // --- SEGURIDAD (FRONTEND) ---
         let currentPassword = localStorage.getItem('app_access_pass') || '';
-
-        // Si no hay contraseña guardada, la pedimos al usuario.
-        // Esto usa la variable APP_PASSWORD que configures en Vercel.
+        
         if (!currentPassword) {
             askForPassword();
         }
 
         function askForPassword() {
-            const pass = prompt("Ingrese la clave de acceso para utilizar la aplicación:");
+            const pass = prompt("Ingrese la clave de acceso:");
             if (pass) {
                 currentPassword = pass;
                 localStorage.setItem('app_access_pass', pass);
             } else {
-                alert("Necesita la clave de acceso para continuar.");
-                // Podrías recargar la página si lo deseas: location.reload();
+                alert("Acceso denegado.");
             }
         }
 
@@ -266,27 +179,17 @@
         }
 
         function getHeaders() {
-            const headers = {
-                'Content-Type': 'application/json'
+            return {
+                'Content-Type': 'application/json',
+                'x-app-password': currentPassword
             };
-            // Enviamos la clave que el usuario ingresó para que el proxy la valide
-            if (currentPassword) {
-                headers['x-app-password'] = currentPassword;
-            }
-            return headers;
         }
 
-        // --- HELPERS UI ---
         function openTab(name) {
             document.querySelectorAll('.tab-panel').forEach(el => el.classList.add('hidden'));
             document.getElementById(`panel-${name}`).classList.remove('hidden');
-            
-            document.querySelectorAll('[id^="btn-"]').forEach(btn => {
-                btn.classList.remove('tab-active');
-                btn.classList.add('text-textGray');
-            });
+            document.querySelectorAll('[id^="btn-"]').forEach(btn => btn.classList.remove('tab-active'));
             document.getElementById(`btn-${name}`).classList.add('tab-active');
-            document.getElementById(`btn-${name}`).classList.remove('text-textGray');
         }
 
         function log(msg, targetId) {
@@ -304,12 +207,9 @@
             let result = [];
             data.forEach(row => {
                 row = row.map(cell => String(cell).trim());
-                
                 if (type === 'crear') {
-                    if (row.length >= 3 && row[1] !== '') {
-                        result.push({ nombre: row[0], cedula: row[1], pantallas: row[2] });
-                    }
-                } else if (type === 'borrar') {
+                    if (row.length >= 3 && row[1] !== '') result.push({ nombre: row[0], cedula: row[1], pantallas: row[2] });
+                } else {
                     let docId = row.length >= 3 ? row[1] : row[0];
                     if (docId) result.push({ cedula: docId });
                 }
@@ -321,115 +221,67 @@
             const tbody = document.getElementById(`table${type.charAt(0).toUpperCase() + type.slice(1)}Body`);
             tbody.innerHTML = '';
             const data = type === 'crear' ? dataCrear : dataBorrar;
-
             data.forEach(item => {
                 const tr = document.createElement('tr');
-                if (type === 'crear') {
-                    tr.innerHTML = `<td class="px-4 py-2">${item.nombre}</td><td class="px-4 py-2 font-mono text-blue">${item.cedula}</td><td class="px-4 py-2">${item.pantallas}</td>`;
-                } else {
-                    tr.innerHTML = `<td class="px-4 py-2 font-mono text-orange">${item.cedula}</td>`;
-                }
+                if (type === 'crear') tr.innerHTML = `<td class="px-4 py-2">${item.nombre}</td><td class="px-4 py-2 font-mono text-blue">${item.cedula}</td><td class="px-4 py-2">${item.pantallas}</td>`;
+                else tr.innerHTML = `<td class="px-4 py-2 font-mono text-orange">${item.cedula}</td>`;
                 tbody.appendChild(tr);
             });
         }
 
         function processFile(type) {
             const fileInput = document.getElementById(`file${type.charAt(0).toUpperCase() + type.slice(1)}`);
-            const file = fileInput.files[0];
-            if (!file) return;
-
+            if (!fileInput.files[0]) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
                 const filtered = jsonData.filter(row => row.length > 0 && row.join('').trim() !== '');
-                
-                if (type === 'crear') {
-                    dataCrear = parseData(filtered, 'crear');
-                    renderTable('crear');
-                    log(`✅ Archivo cargado: ${dataCrear.length} usuarios.`, 'logCrear');
-                } else {
-                    dataBorrar = parseData(filtered, 'borrar');
-                    renderTable('borrar');
-                    log(`✅ Archivo cargado: ${dataBorrar.length} usuarios a borrar.`, 'logBorrar');
-                }
+                if (type === 'crear') { dataCrear = parseData(filtered, 'crear'); renderTable('crear'); log(`✅ Archivo cargado: ${dataCrear.length} usuarios.`, 'logCrear'); }
+                else { dataBorrar = parseData(filtered, 'borrar'); renderTable('borrar'); log(`✅ Archivo cargado: ${dataBorrar.length} usuarios.`, 'logBorrar'); }
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsArrayBuffer(fileInput.files[0]);
         }
 
         function processText(type) {
             const textArea = document.getElementById(`text${type.charAt(0).toUpperCase() + type.slice(1)}`);
             const lines = textArea.value.trim().split('\n').map(line => line.split(','));
-            
-            if (type === 'crear') {
-                dataCrear = parseData(lines, 'crear');
-                renderTable('crear');
-                log(`✅ Texto procesado: ${dataCrear.length} usuarios.`, 'logCrear');
-            } else {
-                dataBorrar = parseData(lines, 'borrar');
-                renderTable('borrar');
-                log(`✅ Texto procesado: ${dataBorrar.length} usuarios.`, 'logBorrar');
-            }
+            if (type === 'crear') { dataCrear = parseData(lines, 'crear'); renderTable('crear'); log(`✅ Texto procesado.`, 'logCrear'); }
+            else { dataBorrar = parseData(lines, 'borrar'); renderTable('borrar'); log(`✅ Texto procesado.`, 'logBorrar'); }
         }
 
-        // --- LLAMADAS API (VÍA PROXY) ---
+        // --- LLAMADAS API ---
         async function startCreation() {
-            if (dataCrear.length === 0) return alert("No hay datos para crear.");
-            if (!confirm(`¿Seguro que deseas crear ${dataCrear.length} usuarios?`)) return;
-            
+            if (dataCrear.length === 0) return alert("No hay datos.");
+            if (!confirm(`¿Crear ${dataCrear.length} usuarios?`)) return;
             document.getElementById('logCrear').innerHTML = ''; 
-            log("🚀 Iniciando proceso de creación...", 'logCrear');
-
             for (const user of dataCrear) {
-                const payload = { docid: user.cedula, nombre: user.nombre, max_connections: String(user.pantallas) };
                 try {
-                    const res = await fetch(ENDPOINTS.new, {
-                        method: 'POST',
-                        headers: getHeaders(),
-                        body: JSON.stringify(payload)
-                    });
+                    const res = await fetch(ENDPOINTS.new, { method: 'POST', headers: getHeaders(), body: JSON.stringify({ docid: user.cedula, nombre: user.nombre, max_connections: String(user.pantallas) }) });
                     const data = await res.json();
-                    if (res.ok) {
-                        log(`✅ OK: ${user.nombre} (${user.cedula})`, 'logCrear');
-                    } else {
-                        log(`❌ Error (${user.nombre}): ${data.error || JSON.stringify(data)}`, 'logCrear');
-                    }
-                } catch (err) {
-                    log(`❌ Conexión fallida: ${err.message}`, 'logCrear');
-                }
+                    if (res.ok) log(`✅ OK: ${user.nombre}`, 'logCrear');
+                    else log(`❌ Error: ${user.nombre} - ${data.error || JSON.stringify(data)}`, 'logCrear');
+                } catch (err) { log(`❌ Conexión fallida`, 'logCrear'); }
                 await new Promise(r => setTimeout(r, 200));
             }
-            log("🏁 Proceso finalizado.", 'logCrear');
+            log("🏁 Finalizado.", 'logCrear');
         }
 
         async function startDeletion() {
-            if (dataBorrar.length === 0) return alert("No hay datos para borrar.");
-            if (!confirm(`⚠️ PELIGRO: ¿Seguro que deseas BORRAR ${dataBorrar.length} usuarios?`)) return;
-
+            if (dataBorrar.length === 0) return alert("No hay datos.");
+            if (!confirm(`⚠️ BORRAR ${dataBorrar.length} usuarios?`)) return;
             document.getElementById('logBorrar').innerHTML = '';
-            log("🚀 Iniciando borrado masivo...", 'logBorrar');
-
             for (const user of dataBorrar) {
                 try {
-                    const res = await fetch(ENDPOINTS.delete, {
-                        method: 'DELETE',
-                        headers: getHeaders(),
-                        body: JSON.stringify({ docid: user.cedula })
-                    });
+                    const res = await fetch(ENDPOINTS.delete, { method: 'DELETE', headers: getHeaders(), body: JSON.stringify({ docid: user.cedula }) });
                     const data = await res.json();
-                    if (res.ok) {
-                        log(`✅ Borrado: ${user.cedula}`, 'logBorrar');
-                    } else {
-                        log(`❌ Error (${user.cedula}): ${data.error || JSON.stringify(data)}`, 'logBorrar');
-                    }
-                } catch (err) {
-                    log(`❌ Conexión fallida: ${err.message}`, 'logBorrar');
-                }
+                    if (res.ok) log(`✅ Borrado: ${user.cedula}`, 'logBorrar');
+                    else log(`❌ Error: ${user.cedula} - ${data.error || JSON.stringify(data)}`, 'logBorrar');
+                } catch (err) { log(`❌ Conexión fallida`, 'logBorrar'); }
                 await new Promise(r => setTimeout(r, 200));
             }
-            log("🏁 Proceso finalizado.", 'logBorrar');
+            log("🏁 Finalizado.", 'logBorrar');
         }
 
         async function fetchList() {
@@ -437,87 +289,45 @@
             const limit = document.getElementById('listLimit').value;
             const tbody = document.getElementById('tableListaBody');
             tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-secondary">Cargando...</td></tr>';
-
             try {
-                // Pasamos page y limit como parámetros query al proxy
-                const res = await fetch(`${ENDPOINTS.list}&page=${page}&limit=${limit}`, {
-                    method: 'GET',
-                    headers: getHeaders()
-                });
+                const res = await fetch(`${ENDPOINTS.list}&page=${page}&limit=${limit}`, { method: 'GET', headers: getHeaders() });
                 const data = await res.json();
-
-                if (!res.ok) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-red-500 font-bold">Error ${res.status}: ${data.error || JSON.stringify(data)}</td></tr>`;
-                    return;
-                }
-
-                let users = [];
-                if (Array.isArray(data)) users = data;
-                else if (data.data) users = data.data;
-                else if (data.users) users = data.users;
-                else if (data.results) users = data.results;
+                if (!res.ok) { tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-red-500 font-bold">Error: ${data.error}</td></tr>`; return; }
                 
+                let users = Array.isArray(data) ? data : (data.data || data.users || []);
                 tbody.innerHTML = '';
-                if (users.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-secondary">La lista está vacía.</td></tr>';
-                    return;
-                }
+                if (users.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-secondary">Vacío.</td></tr>'; return; }
 
                 users.forEach(u => {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="px-4 py-2">${u.nombre || '-'}</td>
-                        <td class="px-4 py-2 font-mono text-blue">${u.docid || u.username || '-'}</td>
-                        <td class="px-4 py-2">${u.max_connections || '-'}</td>
-                        <td class="px-4 py-2"><span class="px-2 py-1 text-xs rounded-full ${u.status === 'active' ? 'bg-green/10 text-green' : 'bg-gray-100 text-secondary'}">${u.status || '-'}</span></td>
-                        <td class="px-4 py-2 text-xs text-textGray">${u._id || '-'}</td>
-                    `;
+                    tr.innerHTML = `<td class="px-4 py-2">${u.nombre || '-'}</td><td class="px-4 py-2 font-mono text-blue">${u.docid || '-'}</td><td class="px-4 py-2">${u.max_connections || '-'}</td><td class="px-4 py-2"><span class="px-2 py-1 text-xs rounded-full ${u.status === 'active' ? 'bg-green/10 text-green' : 'bg-gray-100 text-secondary'}">${u.status || '-'}</span></td><td class="px-4 py-2 text-xs text-textGray">${u._id || '-'}</td>`;
                     tbody.appendChild(tr);
                 });
-
-            } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-red-500">Error de conexión: ${err.message}</td></tr>`;
-            }
+            } catch (err) { tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-red-500">Error: ${err.message}</td></tr>`; }
         }
 
         async function searchUser() {
             const docId = document.getElementById('searchDocId').value;
-            if (!docId) return alert("Ingrese una cédula.");
-            
+            if (!docId) return alert("Ingrese cédula.");
             const resBox = document.getElementById('resultIndividual');
             resBox.innerText = "Buscando...";
-
             try {
-                // Pasamos docid como query param
-                const res = await fetch(`${ENDPOINTS.show}&docid=${docId}`, {
-                    method: 'GET',
-                    headers: getHeaders()
-                });
+                const res = await fetch(`${ENDPOINTS.show}&docid=${docId}`, { method: 'GET', headers: getHeaders() });
                 const data = await res.json();
                 resBox.innerText = JSON.stringify(data, null, 4);
-            } catch (err) {
-                resBox.innerText = `Error: ${err.message}`;
-            }
+            } catch (err) { resBox.innerText = `Error: ${err.message}`; }
         }
         
         async function deleteIndividual() {
             const docId = document.getElementById('searchDocId').value;
-            if (!docId) return alert("Ingrese una cédula en el campo de búsqueda primero.");
-            if(!confirm(`¿Seguro que deseas borrar al usuario ${docId}?`)) return;
-
+            if (!docId) return alert("Ingrese cédula.");
+            if(!confirm(`¿Borrar usuario ${docId}?`)) return;
             const resBox = document.getElementById('resultIndividual');
             try {
-                const res = await fetch(ENDPOINTS.delete, {
-                    method: 'DELETE',
-                    headers: getHeaders(),
-                    body: JSON.stringify({ docid: docId })
-                });
+                const res = await fetch(ENDPOINTS.delete, { method: 'DELETE', headers: getHeaders(), body: JSON.stringify({ docid: docId }) });
                 const data = await res.json();
                 resBox.innerText = JSON.stringify(data, null, 4);
-                alert("Usuario eliminado (si la API respondió 200 OK).");
-            } catch (err) {
-                resBox.innerText = `Error: ${err.message}`;
-            }
+            } catch (err) { resBox.innerText = `Error: ${err.message}`; }
         }
     </script>
 </body>
