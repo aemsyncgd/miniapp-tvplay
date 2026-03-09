@@ -289,40 +289,87 @@
             const limit = document.getElementById('listLimit').value;
             const tbody = document.getElementById('tableListaBody');
             tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-secondary">Cargando...</td></tr>';
+            
             try {
                 const res = await fetch(`${ENDPOINTS.list}&page=${page}&limit=${limit}`, { method: 'GET', headers: getHeaders() });
                 const data = await res.json();
-                if (!res.ok) { tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-red-500 font-bold">Error: ${data.error}</td></tr>`; return; }
                 
-                let users = Array.isArray(data) ? data : (data.data || data.users || []);
+                // --- NUEVA LÓGICA DE DETECCIÓN DE ERRORES ---
+                // Si la API responde con un objeto de error directamente
+                if (data.error) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-red-500 font-bold">Error API: ${data.error}</td></tr>`;
+                    return;
+                }
+                // Si el proxy responde con error de autenticación
+                if (!res.ok) {
+                     tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-red-500 font-bold">Error ${res.status}: ${data.error || JSON.stringify(data)}</td></tr>`;
+                     return;
+                }
+
+                // --- LÓGICA DE LISTA MEJORADA ---
+                let users = [];
+                if (Array.isArray(data)) {
+                    users = data;
+                } else if (data.data && Array.isArray(data.data)) {
+                    users = data.data;
+                } else if (data.users && Array.isArray(data.users)) {
+                    users = data.users;
+                } else if (data.results && Array.isArray(data.results)) {
+                    users = data.results;
+                } else {
+                    // Si llegamos aquí, la estructura es desconocida
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-orange">Formato de respuesta desconocido.<br><small>${JSON.stringify(data)}</small></td></tr>`;
+                    return;
+                }
+
                 tbody.innerHTML = '';
-                if (users.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-secondary">Vacío.</td></tr>'; return; }
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-secondary">La lista está vacía.</td></tr>';
+                    return;
+                }
 
                 users.forEach(u => {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td class="px-4 py-2">${u.nombre || '-'}</td><td class="px-4 py-2 font-mono text-blue">${u.docid || '-'}</td><td class="px-4 py-2">${u.max_connections || '-'}</td><td class="px-4 py-2"><span class="px-2 py-1 text-xs rounded-full ${u.status === 'active' ? 'bg-green/10 text-green' : 'bg-gray-100 text-secondary'}">${u.status || '-'}</span></td><td class="px-4 py-2 text-xs text-textGray">${u._id || '-'}</td>`;
+                    tr.innerHTML = `<td class="px-4 py-2">${u.nombre || '-'}</td><td class="px-4 py-2 font-mono text-blue">${u.docid || u.username || '-'}</td><td class="px-4 py-2">${u.max_connections || '-'}</td><td class="px-4 py-2"><span class="px-2 py-1 text-xs rounded-full ${u.status === 'active' ? 'bg-green/10 text-green' : 'bg-gray-100 text-secondary'}">${u.status || '-'}</span></td><td class="px-4 py-2 text-xs text-textGray">${u._id || '-'}</td>`;
                     tbody.appendChild(tr);
                 });
-            } catch (err) { tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-red-500">Error: ${err.message}</td></tr>`; }
+
+            } catch (err) { 
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-red-500">Error de Red: ${err.message}</td></tr>`; 
+            }
         }
 
         async function searchUser() {
             const docId = document.getElementById('searchDocId').value;
-            if (!docId) return alert("Ingrese cédula.");
+            if (!docId) return alert("Ingrese una cédula.");
+            
             const resBox = document.getElementById('resultIndividual');
             resBox.innerText = "Buscando...";
+            
             try {
+                // Construimos la URL correctamente: /api/proxy?endpoint=user/show&docid=VALOR
                 const res = await fetch(`${ENDPOINTS.show}&docid=${docId}`, { method: 'GET', headers: getHeaders() });
                 const data = await res.json();
+                
+                // Mostramos todo en el cuadro de resultado para depuración
                 resBox.innerText = JSON.stringify(data, null, 4);
-            } catch (err) { resBox.innerText = `Error: ${err.message}`; }
+                
+                if (data.error) {
+                    resBox.innerText = `ERROR:\n${JSON.stringify(data, null, 4)}`;
+                }
+            } catch (err) { 
+                resBox.innerText = `Error Crítico: ${err.message}`; 
+            }
         }
         
         async function deleteIndividual() {
             const docId = document.getElementById('searchDocId').value;
-            if (!docId) return alert("Ingrese cédula.");
+            if (!docId) return alert("Ingrese una cédula en el campo de búsqueda primero.");
             if(!confirm(`¿Borrar usuario ${docId}?`)) return;
+            
             const resBox = document.getElementById('resultIndividual');
+            resBox.innerText = "Borrando...";
+            
             try {
                 const res = await fetch(ENDPOINTS.delete, { method: 'DELETE', headers: getHeaders(), body: JSON.stringify({ docid: docId }) });
                 const data = await res.json();
